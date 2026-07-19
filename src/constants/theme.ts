@@ -1,65 +1,122 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
-import '@/global.css';
-
 import { Platform } from 'react-native';
 
-export const Colors = {
-  light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
-  },
-  dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
-  },
+/**
+ * Murphy — "Ember Noir": a chosen neutral ground (near-black / near-white),
+ * quiet glass, and orange-red reserved for numbers and actions. Full light +
+ * dark. Consume via `useTheme()`; never import a palette object directly.
+ */
+export interface ThemeColors {
+  bg: string;
+  bgElevated: string;
+  text: string;
+  textDim: string;
+  textFaint: string;
+  /** Translucent glass fill (over the blur). */
+  surface: string;
+  /** Opaque fill for inputs / controls. */
+  surfaceSolid: string;
+  surfaceSolidPressed: string;
+  border: string;
+  accent: string;
+  accentSoft: string;
+  onAccent: string;
+  good: string;
+  goodSoft: string;
+  warn: string;
+  warnSoft: string;
+  danger: string;
+  dangerSoft: string;
+  /** Ambient glow blobs behind the glass. */
+  glowA: string;
+  glowB: string;
+  glowOpacityA: number;
+  glowOpacityB: number;
+  blurTint: 'dark' | 'light';
+  blurIntensity: number;
+}
+
+export const DarkColors: ThemeColors = {
+  bg: '#0a0a0c',
+  bgElevated: '#141417',
+  text: '#f4f4f6',
+  textDim: 'rgba(255,255,255,0.52)',
+  textFaint: 'rgba(255,255,255,0.32)',
+  surface: 'rgba(255,255,255,0.05)',
+  surfaceSolid: 'rgba(255,255,255,0.065)',
+  surfaceSolidPressed: 'rgba(255,255,255,0.12)',
+  border: 'rgba(255,255,255,0.09)',
+  accent: '#ff5a1f',
+  accentSoft: 'rgba(255,90,31,0.14)',
+  onAccent: '#ffffff',
+  good: '#34d27b',
+  goodSoft: 'rgba(52,210,123,0.14)',
+  warn: '#fbbf24',
+  warnSoft: 'rgba(251,191,36,0.14)',
+  danger: '#ff453a',
+  dangerSoft: 'rgba(255,69,58,0.14)',
+  glowA: '#ff3b1f',
+  glowB: '#ff7a00',
+  glowOpacityA: 0.16,
+  glowOpacityB: 0.1,
+  blurTint: 'dark',
+  blurIntensity: 24,
+};
+
+export const LightColors: ThemeColors = {
+  bg: '#f4f4f6',
+  bgElevated: '#ffffff',
+  text: '#111114',
+  textDim: 'rgba(17,17,20,0.58)',
+  textFaint: 'rgba(17,17,20,0.36)',
+  surface: 'rgba(255,255,255,0.72)',
+  surfaceSolid: '#ffffff',
+  surfaceSolidPressed: '#ececef',
+  border: 'rgba(20,20,30,0.10)',
+  accent: '#e64a19',
+  accentSoft: 'rgba(230,74,25,0.10)',
+  onAccent: '#ffffff',
+  good: '#1f9d57',
+  goodSoft: 'rgba(31,157,87,0.12)',
+  warn: '#b45309',
+  warnSoft: 'rgba(180,83,9,0.12)',
+  danger: '#e5342a',
+  dangerSoft: 'rgba(229,52,42,0.10)',
+  glowA: '#ff5a1f',
+  glowB: '#ff8a1f',
+  glowOpacityA: 0.1,
+  glowOpacityB: 0.07,
+  blurTint: 'light',
+  blurIntensity: 30,
+};
+
+export const Spacing = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
 } as const;
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
+export const Radius = {
+  sm: 12,
+  md: 16,
+  lg: 18,
+  xl: 24,
+  pill: 999,
+} as const;
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {
     sans: 'normal',
-    serif: 'serif',
     rounded: 'normal',
     mono: 'monospace',
   },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
 });
 
-export const Spacing = {
-  half: 2,
-  one: 4,
-  two: 8,
-  three: 16,
-  four: 24,
-  five: 32,
-  six: 64,
-} as const;
-
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
-export const MaxContentWidth = 800;
+export const BottomTabInset = Platform.select({ ios: 84, android: 96 }) ?? 84;

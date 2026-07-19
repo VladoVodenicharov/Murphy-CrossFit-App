@@ -1,14 +1,16 @@
 {
   "expo": {
-    "name": "murphy",
+    "name": "Murphy",
     "slug": "murphy",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "murphy",
     "userInterfaceStyle": "automatic",
+    "backgroundColor": "#0a0a0c",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.vladovodenicharov.murphy"
     },
     "android": {
       "adaptiveIcon": {
@@ -28,11 +30,15 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#0a0a0c",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 76,
+          "dark": { "backgroundColor": "#0a0a0c" }
         }
-      ]
+      ],
+      "expo-sqlite",
+      "expo-audio",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,
