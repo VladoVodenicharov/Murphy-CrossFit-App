@@ -77,6 +77,8 @@ export interface WodDef {
   blurb?: string;
   /** Standards / scheme notes, e.g. "21-15-9" or "Partition as needed." */
   description?: string;
+  /** Saved custom/box WODs only: pinned to the Benchmarks screen's Favorites. */
+  pinned?: boolean;
 }
 
 /** Row shape of the `results` table (snake_case mirrors the SQL columns). */
@@ -104,6 +106,7 @@ export interface WodRow {
   config_json: string;
   movements_json: string;
   created_at: string;
+  pinned: number; // 0 | 1
 }
 
 /** A gym session is either a strength workout or a cardio workout. */

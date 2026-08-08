@@ -21,11 +21,12 @@ interface MovementRowProps {
   draft: MovementDraft;
   onChange: (patch: Partial<MovementDraft>) => void;
   onRemove: () => void;
+  onDuplicate: () => void;
   removable: boolean;
 }
 
 /** One structured movement: name (+ suggestions), unit, quantity, optional kg. */
-export function MovementRow({ draft, onChange, onRemove, removable }: MovementRowProps) {
+export function MovementRow({ draft, onChange, onRemove, onDuplicate, removable }: MovementRowProps) {
   const c = useTheme();
   const [focused, setFocused] = useState(false);
   const suggestions = focused ? suggestMovements(draft.name) : [];
@@ -60,11 +61,20 @@ export function MovementRow({ draft, onChange, onRemove, removable }: MovementRo
         <Pressable
           onPress={() => {
             Haptics.selectionAsync();
+            onDuplicate();
+          }}
+          hitSlop={8}
+          style={[styles.iconButton, { backgroundColor: c.surfaceSolid, borderColor: c.border }]}>
+          <Ionicons name="copy-outline" size={15} color={c.textDim} />
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            Haptics.selectionAsync();
             onRemove();
           }}
           disabled={!removable}
           hitSlop={8}
-          style={[styles.removeButton, { backgroundColor: c.surfaceSolid, borderColor: c.border }, !removable && styles.removeDisabled]}>
+          style={[styles.iconButton, { backgroundColor: c.surfaceSolid, borderColor: c.border }, !removable && styles.removeDisabled]}>
           <Ionicons name="close" size={16} color={c.textDim} />
         </Pressable>
       </View>
@@ -135,7 +145,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
-  removeButton: {
+  iconButton: {
     width: 34,
     height: 34,
     borderRadius: 17,

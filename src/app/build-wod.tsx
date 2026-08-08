@@ -11,11 +11,11 @@ import { GradientBackground } from '@/components/gradient-background';
 import { MovementRow, EMPTY_MOVEMENT, type MovementDraft } from '@/components/movement-row';
 import { PrimaryButton } from '@/components/primary-button';
 import { ScreenHeader } from '@/components/screen-header';
-import { SegmentedPills } from '@/components/segmented-pills';
+import { TimeField } from '@/components/time-field';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { saveWod } from '@/lib/db';
-import { mmss, parseFloatField, parseIntField } from '@/lib/format';
+import { mmss, parseFloatField, parseIntField, parseTime } from '@/lib/format';
 import {
   ALL_WOD_FORMATS,
   WOD_FORMAT_LABEL,
@@ -24,13 +24,6 @@ import {
   type WodParams,
 } from '@/lib/types';
 
-const EMOM_INTERVAL_OPTIONS = [
-  { value: 30, label: '0:30' },
-  { value: 60, label: '1:00' },
-  { value: 90, label: '1:30' },
-  { value: 120, label: '2:00' },
-] as const;
-
 /** Build a custom/box WOD (structured movements), save it, then log it. */
 export default function BuildWodScreen() {
   const c = useTheme();
@@ -38,15 +31,22 @@ export default function BuildWodScreen() {
   const [format, setFormat] = useState<WodFormat>('FOR_TIME');
   const [capMin, setCapMin] = useState(0);
   const [amrapMin, setAmrapMin] = useState(12);
-  const [intervalSec, setIntervalSec] = useState(60);
+  const [intervalMm, setIntervalMm] = useState('1');
+  const [intervalSs, setIntervalSs] = useState('00');
   const [rounds, setRounds] = useState(10);
   const [movements, setMovements] = useState<MovementDraft[]>([{ ...EMPTY_MOVEMENT }]);
+
+  const intervalSec = parseTime(intervalMm, intervalSs) ?? 0;
 
   function updateMovement(index: number, patch: Partial<MovementDraft>) {
     setMovements((list) => list.map((m, i) => (i === index ? { ...m, ...patch } : m)));
   }
   function removeMovement(index: number) {
     setMovements((list) => (list.length > 1 ? list.filter((_, i) => i !== index) : list));
+  }
+  function duplicateMovement(index: number) {
+    Haptics.selectionAsync();
+    setMovements((list) => [...list.slice(0, index + 1), { ...list[index] }, ...list.slice(index + 1)]);
   }
   function addMovement() {
     Haptics.selectionAsync();
@@ -62,7 +62,7 @@ export default function BuildWodScreen() {
       case 'EMOM':
         return { intervalSec, rounds };
       case 'INTERVALS':
-        return { rounds };
+        return { intervalSec, rounds };
       case 'TABATA':
         return { intervalSec: 20, rounds: 8 };
       default:
@@ -163,10 +163,13 @@ export default function BuildWodScreen() {
               )}
               {format === 'EMOM' && (
                 <View style={styles.paramsStack}>
-                  <View style={{ gap: Spacing.sm }}>
-                    <Text style={[styles.paramLabel, { color: c.textDim }]}>Every</Text>
-                    <SegmentedPills options={EMOM_INTERVAL_OPTIONS} value={intervalSec} onChange={setIntervalSec} />
-                  </View>
+                  <TimeField
+                    label="Every (interval)"
+                    mm={intervalMm}
+                    ss={intervalSs}
+                    onChangeMm={setIntervalMm}
+                    onChangeSs={setIntervalSs}
+                  />
                   <EditableStepper label="Rounds" value={rounds} onChange={setRounds} min={1} max={90} />
                   <Text style={[styles.paramHint, { color: c.textFaint }]}>
                     {rounds} × {mmss(intervalSec)} · {mmss(rounds * intervalSec)} total
@@ -174,7 +177,19 @@ export default function BuildWodScreen() {
                 </View>
               )}
               {format === 'INTERVALS' && (
-                <EditableStepper label="Rounds" value={rounds} onChange={setRounds} min={1} max={30} />
+                <View style={styles.paramsStack}>
+                  <TimeField
+                    label="Each interval"
+                    mm={intervalMm}
+                    ss={intervalSs}
+                    onChangeMm={setIntervalMm}
+                    onChangeSs={setIntervalSs}
+                  />
+                  <EditableStepper label="Rounds" value={rounds} onChange={setRounds} min={1} max={30} />
+                  <Text style={[styles.paramHint, { color: c.textFaint }]}>
+                    {rounds} × {mmss(intervalSec)} through all stations
+                  </Text>
+                </View>
               )}
               {format === 'TABATA' && (
                 <Text style={[styles.paramHint, { color: c.textFaint }]}>8 rounds · 0:20 work / 0:10 rest</Text>
@@ -184,7 +199,14 @@ export default function BuildWodScreen() {
 
           {/* Movements */}
           <GlassCard>
-            <Text style={[styles.cardLabel, { color: c.textDim }]}>MOVEMENTS</Text>
+            <Text style={[styles.cardLabel, { color: c.textDim }]}>
+              {format === 'INTERVALS' ? 'STATIONS' : 'MOVEMENTS'}
+            </Text>
+            {format === 'INTERVALS' ? (
+              <Text style={[styles.movementsHint, { color: c.textFaint }]}>
+                One round runs through every station, back to back.
+              </Text>
+            ) : null}
             <View style={styles.movementsStack}>
               {movements.map((draft, i) => (
                 <MovementRow
@@ -192,6 +214,7 @@ export default function BuildWodScreen() {
                   draft={draft}
                   onChange={(patch) => updateMovement(i, patch)}
                   onRemove={() => removeMovement(i)}
+                  onDuplicate={() => duplicateMovement(i)}
                   removable={movements.length > 1}
                 />
               ))}
@@ -253,14 +276,16 @@ const styles = StyleSheet.create({
   paramsStack: {
     gap: Spacing.md,
   },
-  paramLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
   paramHint: {
     fontSize: 12,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  movementsHint: {
+    fontSize: 12.5,
+    fontWeight: '500',
+    marginTop: -Spacing.sm,
+    marginBottom: Spacing.md,
   },
   movementsStack: {
     gap: Spacing.md,

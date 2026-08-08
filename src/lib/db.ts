@@ -12,7 +12,7 @@ import type {
   WodRow,
 } from './types';
 
-const SCHEMA_VERSION = 4;
+const SCHEMA_VERSION = 5;
 
 let db: SQLiteDatabase | null = null;
 
@@ -131,6 +131,12 @@ export function getDb(): SQLiteDatabase {
       version = 4;
     }
 
+    if (version < 5) {
+      // Pin a custom/box WOD so it also shows on the Benchmarks screen's Favorites.
+      db.execSync(`ALTER TABLE wods ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0;`);
+      version = 5;
+    }
+
     if (version !== SCHEMA_VERSION) {
       db.execSync(`PRAGMA user_version = ${SCHEMA_VERSION};`);
     }
@@ -170,7 +176,19 @@ function rowToWodDef(row: WodRow): WodDef {
   try {
     movements = JSON.parse(row.movements_json) as Movement[];
   } catch {}
-  return { ref: `custom:${row.id}`, name: row.name, format: row.format, params, movements };
+  return {
+    ref: `custom:${row.id}`,
+    name: row.name,
+    format: row.format,
+    params,
+    movements,
+    pinned: row.pinned === 1,
+  };
+}
+
+/** Pin/unpin a saved custom/box WOD (surfaces it under Benchmarks → Favorites). */
+export function setWodPinned(id: number, pinned: boolean): void {
+  getDb().runSync(`UPDATE wods SET pinned = ? WHERE id = ?`, pinned ? 1 : 0, id);
 }
 
 /** All saved custom/box WODs, newest first. */

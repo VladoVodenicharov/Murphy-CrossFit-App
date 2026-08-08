@@ -16,6 +16,7 @@ export default function RootLayout() {
         <Stack.Screen name="gym" />
         <Stack.Screen name="gym-strength" />
         <Stack.Screen name="gym-cardio" />
+        <Stack.Screen name="prs" />
       </Stack>
       {/* "auto" = light text on our dark ground, dark text on the light ground. */}
       <StatusBar style="auto" />

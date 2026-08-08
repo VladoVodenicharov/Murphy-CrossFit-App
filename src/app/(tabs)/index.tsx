@@ -47,6 +47,12 @@ export default function HomeScreen() {
             subtitle="Strength lifts & cardio"
             onPress={() => router.push('/gym')}
           />
+          <ChoiceCard
+            icon="medal-outline"
+            title="Personal Records"
+            subtitle="Your best lifts, times & efforts"
+            onPress={() => router.push('/prs')}
+          />
 
           {recent.length > 0 ? (
             <View style={styles.recentSection}>
